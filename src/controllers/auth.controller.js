@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import service from "../services/auth.service.js";
 
 async function login(req, res) {
@@ -22,10 +23,11 @@ async function login(req, res) {
         //GERANDO TOKEN DE ACESSO
         const token = service.generateToken(user.id);
 
+        return res.send(token);
         
     } catch (error) {
         //RETORNA ERRO CASO NÃO COSSIGA EXECUTAR O TRY
-        res.status(500).send({menssagem: error.message});
+        return res.status(500).send({menssagem: error.message});
     }
 }
 

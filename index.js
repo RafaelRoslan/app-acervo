@@ -1,10 +1,13 @@
-import express      from "express";
-import dotenv       from "dotenv";
-import connectDB    from "./src/database/db.js";
+import dotenv from "dotenv";
+import express from "express";
+import connectDB from "./src/database/db.js";
 
 //IMPORT DE ROUTES
-import user from "./src/routes/user.route.js";
 import login from "./src/routes/auth.route.js";
+import books from "./src/routes/book.route.js";
+import collections from "./src/routes/collection.route.js";
+import users from "./src/routes/user.route.js";
+
 
 //EXECUTANDO DOTENV
 dotenv.config();
@@ -14,11 +17,13 @@ const PORT = 3001;
 const app  = express();
 
 //CONECTANDO COM BANCO
-////connectDB();
+connectDB();
 
 app.use(express.json());
-app.use("/user", user);
+app.use("/users", users);
 app.use("/login", login);
+app.use("/collections", collections);
+app.use("/collections", books);
 
 app.listen(PORT, ()=> console.log(`server runnig on PORT ${PORT}`));
 

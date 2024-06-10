@@ -1,13 +1,15 @@
 //IMPORTS
 import express from "express";
 import controller from "../controllers/user.controller.js";
+import authenticate from "../middlewares/auth.middleware.js";
+import { validateId, validateUser } from "../middlewares/global.middleware.js";
 
 
 const route = express.Router();
 
 route.post("/", controller.createUser);
-route.get("/:id", controller.readUser);
-route.put("/:id", controller.updateUser);
-route.delete("/:id", controller.deleteUser);
+route.get("/:id",authenticate, validateId, validateUser, controller.readUser);
+route.patch("/:id",authenticate, validateId, validateUser, controller.updateUser);
+route.patch("/:id/delete",authenticate, validateId, validateUser, controller.deleteUser);
 
 export default route;

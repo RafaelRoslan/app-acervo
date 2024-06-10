@@ -8,13 +8,13 @@ async function createUser(req, res) {
         //VALIDANDO VARIAVEIS
         if(!name || !lastname || !email || !password){
             //RETORNANDO ERRO 400(BAD REQUEST) SE FALTAR DADOS
-            return res.status(400).send({menssagem: "preencha todos os campos para registro."});
+            return res.status(400).send({messagem: "preencha todos os campos para registro."});
         }
 
         //SOLICITANDO AO SERVICE A CRIAÇÃO DO USUARIO
         let user = await service.createUser(req.body);
         if (!user) {
-            return res.status(400).send({menssagem: "Erro ao cadastrar usúario"})
+            return res.status(400).send({messagem: "Erro ao cadastrar usúario"})
         }
 
         //CRIANDO UM OBJ USUARIO
@@ -26,7 +26,7 @@ async function createUser(req, res) {
         };
 
         //RETORNANDO SUCESSO COM MENSAGEM
-        res.status(201).send({message: "Cliente cadastrado com sucesso", userRes});
+        res.status(200).send({message: "Cliente cadastrado com sucesso", userRes});
     } catch (error) {
         //RETORNANDO ERRO CASO NÃO COSSIGA EXECUTAR O TRY
         res.status(500).send({message: error.message});
@@ -41,11 +41,11 @@ async function readUser(req, res) {
          //SOLICITANDO AO SERVICE O RECEBIMENTO DO USUARIO
          const user = await service.getUser(id);
          if(!user){
-             return res.status(400).send({message: "Usuario não encontrado"});
+            return res.status(400).send({message: "Usuario não encontrado"});
          }
  
          //RETORNANDO SUCESSO COM MENSAGEM
-         res.status(201).send({user});
+         res.status(200).send({user});
     } catch (error) {
         //RETORNANDO ERRO CASO NÃO COSSIGA EXECUTAR O TRY
         res.status(500).send({message: error.message});
@@ -54,6 +54,7 @@ async function readUser(req, res) {
 
 async function updateUser(req, res) {
     try {
+        
         //DESSETRUTURANDO OBJETO EM VARIAVEIS        
         const {name, lastname, email, password, status} = req.body;
         const id = req.params.id;
@@ -64,9 +65,12 @@ async function updateUser(req, res) {
             return res.status(400).send({menssagem: "preencha todos os campos para registro."});
         }
 
-        //SOLICITANDO AO SERVICE A BUSCA DO USUARIO
-        const user = await userService.getByIdService(id);
-        if(String(user._id) != req.id){
+        //SOLICITANDO AO SERVICE A BUSCA DO USUARIO E CHECANDO
+        const user = await service.getUser(id);
+        if(!user){
+            return res.status(400).send({message: "Usuario não encontrado"});
+         }
+        if(String(user._id) != req.userId){
             return res.status(400).send({menssagem: "Voce não pode atualizar outro usuario"});
         }
 
@@ -74,7 +78,7 @@ async function updateUser(req, res) {
         await service.updateUser(id, name, lastname, email, password, status);
 
         //RETORNANDO SUCESSO COM MENSAGEM
-        res.status(201).send({user});
+        res.status(200).send({menssagem:"Cliente autalizado com sucesso"});
     } catch (error) {
         //RETORNANDO ERRO CASO NÃO COSSIGA EXECUTAR O TRY
         res.status(500).send({message: error.message});
@@ -88,15 +92,19 @@ async function deleteUser(req, res) {
 
         //SOLICITANDO AO SERVICE O RECEBIMENTO DO USUARIO
         const user = await service.getUser(id);
-        if(String(user._id) != req.id){
-            return res.status(400).send({menssagem: "Voce não pode atualizar outro usuario"});
+
+        if(!user){
+            return res.status(400).send({message: "Usuario não encontrado"});
+         }
+        if(String(user._id) != req.userId){
+            return res.status(400).send({menssagem: "Voce não pode deletar outro usuario"});
         }
 
         //SOLICITANDO AO SERVICE O RECEBIMENTO DO USUARIO
         await service.deleteUser(id);
 
         //RETORNANDO SUCESSO COM MENSAGEM
-        res.status(201).send({message: "Cliente cadastrado com sucesso", userRes});
+        res.status(200).send({message: "Cliente deletado com sucesso"});
     } catch (error) {
         //RETORNANDO ERRO CASO NÃO COSSIGA EXECUTAR O TRY
         res.status(500).send({message: error.message});

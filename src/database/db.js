@@ -6,7 +6,7 @@ function connectDatabase() {
     console.log("Conectando com banco de dados");
 
     //tentando conectar ao banco de dados
-    mongoose.connect("mongodb+srv://root:root@cluster0.2vk2vtl.mongodb.net/AcervoDB?retryWrites=true&w=majority&appName=Cluster0")
+    mongoose.connect(process.env.DB_URL)
         .then(()=>console.log("Banco de dados conectado com sucesso"))
         .catch((error)=>console.log(error));
 }

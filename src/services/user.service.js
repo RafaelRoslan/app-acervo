@@ -2,22 +2,22 @@ import User from "../models/User.js";
 
 //FUNCAO CRIAR USUARIO
 function createUser(body) {
-    User.create(body);
+    return User.create(body);
 }
 
 //FUNCAO RECEBER USUARIO
 function getUser(id) {
-    User.findById(id);
+    return User.find({_id:id, status:"ativo"});
 }
 
 //FUNCAO ATUALIZAR USUARIO
 function updateUser(id, name, lastname, email, password, status) {
-    return User.findOneAndUpdate({_id: id}, name, lastname, email, password, status);
+    return User.findOneAndUpdate({_id: id},{name,lastname,email,password, status});
 }
 
 //FUNCAO DELETAR USUARIO
 function deleteUser(id) {
-    User.findOneAndDelete({_id: id});
+    return User.findOneAndUpdate({_id: id},{status:"inativo"});
 }
 
 export default {
