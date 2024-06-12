@@ -29,8 +29,9 @@ async function createCollection(req, res) {
 
 async function readCollections(req, res) {
     try {
+        const userId = req.userId;
 
-        const collections = await service.getAllCollections();
+        const collections = await service.getAllCollections(userId);
         if(collections.length < 1){
             return res.status(400).send({message: "Não há coleções cadastradas"});
         }

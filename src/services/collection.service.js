@@ -4,8 +4,8 @@ function createCollection(body) {
     return Collection.create(body);
 }
 
-function getAllCollections(){
-    return Collection.find();
+function getAllCollections(userId){
+    return Collection.find({userId:userId});
 }
 
 function updateCollection(id,name) {

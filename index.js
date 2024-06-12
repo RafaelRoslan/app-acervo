@@ -16,6 +16,8 @@ dotenv.config();
 const PORT = 3001; 
 const app  = express();
 
+
+
 //CONECTANDO COM BANCO
 connectDB();
 
