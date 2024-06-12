@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import service from "../services/user.service.js";
 
 function validateId(req, res, next) {
-    const id  = req.userId;
+    const id  = req.params.id;
 
     if(id && !mongoose.Types.ObjectId.isValid(id)){
         return res.status(400).send({menssagem: "ID invalido"});
@@ -21,7 +21,7 @@ function validateCollectionId(req, res, next) {
     return next();
 }
 function validateBookId(req, res, next) {
-    const { bookId } = req.params;
+    const { bookId } = req.params.id;
 
     if (bookId && !mongoose.Types.ObjectId.isValid(bookId)) {
         return res.status(400).send({ message: "ID de livro inválido" });

@@ -32,7 +32,7 @@ function authenticate(req, res, next) {
 
             const user = await service.getUser(decoded.id);
 
-            if(!user){
+            if(!user || !user._id){
                 return res.status(401).send({menssagem: "Token invalido"})
             }
 

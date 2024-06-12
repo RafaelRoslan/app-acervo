@@ -36,7 +36,7 @@ async function createUser(req, res) {
 async function readUser(req, res) {
     try {
          //ATRIBUINDO REQ EM VARIAVEL
-         const id = req.params.id;
+         const {id} = req.params;
 
          //SOLICITANDO AO SERVICE O RECEBIMENTO DO USUARIO
          const user = await service.getUser(id);

@@ -1,3 +1,4 @@
+import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import connectDB from "./src/database/db.js";
@@ -20,6 +21,10 @@ const app  = express();
 
 //CONECTANDO COM BANCO
 connectDB();
+app.use(cors({
+    origin: 'http://localhost:4200',
+    optionsSuccessStatus: 200
+}))
 
 app.use(express.json());
 app.use("/users", users);

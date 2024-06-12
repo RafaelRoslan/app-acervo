@@ -7,7 +7,7 @@ function createUser(body) {
 
 //FUNCAO RECEBER USUARIO
 function getUser(id) {
-    return User.find({_id:id, status:"ativo"});
+    return User.findOne({_id:id, status:"ativo"});
 }
 
 //FUNCAO ATUALIZAR USUARIO
