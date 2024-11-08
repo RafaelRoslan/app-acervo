@@ -25,7 +25,25 @@ const UserSchema = new mongoose.Schema({
         type: String,
         enum: ['ativo', 'inativo'], 
         default: 'ativo'
-    }
+    },
+    address: {
+        logradouro: String,
+        numero: String,
+        bairro: String,
+        complemento: String,
+        cidade: String,
+        estado: String
+    },
+    bankDetails: {
+        conta: String,
+        agencia: String,
+        tipoConta: String, // (poupança, corrente etc.)
+        titular: String,
+        cpfTitular: String
+    },
+    pix: {
+        chave: String
+    },
 });
 
 UserSchema.pre("save", async function (next){
