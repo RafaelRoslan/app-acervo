@@ -4,11 +4,12 @@ import express from "express";
 import connectDB from "./src/database/db.js";
 
 //IMPORT DE ROUTES
+import negotiation from "./routes/negotiation.routes.js";
+import rating from "./routes/rating.routes.js";
 import login from "./src/routes/auth.route.js";
 import books from "./src/routes/book.route.js";
 import collections from "./src/routes/collection.route.js";
 import users from "./src/routes/user.route.js";
-
 
 //EXECUTANDO DOTENV
 dotenv.config();
@@ -31,6 +32,8 @@ app.use("/users", users);
 app.use("/login", login);
 app.use("/collections", collections);
 app.use("/collections", books);
+app.use("/negotiations", negotiation);
+app.use("/ratings", rating);
 
 app.listen(PORT, ()=> console.log(`server runnig on PORT ${PORT}`));
 
