@@ -3,39 +3,37 @@ import dotenv from "dotenv";
 import express from "express";
 import connectDB from "./src/database/db.js";
 
-//IMPORT DE ROUTES
-import negotiation from "./routes/negotiation.routes.js";
-import rating from "./routes/rating.routes.js";
+// ROTAS — todos dentro de src/routes e com .route.js (singular)
 import login from "./src/routes/auth.route.js";
 import books from "./src/routes/book.route.js";
 import collections from "./src/routes/collection.route.js";
+import negotiation from "./src/routes/negotiation.route.js";
+import rating from "./src/routes/rating.route.js";
 import users from "./src/routes/user.route.js";
 
-//EXECUTANDO DOTENV
 dotenv.config();
 
-//VARIAVEIS
-const PORT = 3001; 
-const app  = express();
+const PORT = process.env.PORT || 3001;
+const app = express();
 
-
-
-//CONECTANDO COM BANCO
 connectDB();
-app.use(cors({
-    origin: 'http://localhost:4200',
-    optionsSuccessStatus: 200
-}))
 
+app.use(cors({
+  origin: process.env.FRONT_URL || "http://localhost:4200",
+  optionsSuccessStatus: 200
+}));
 app.use(express.json());
+
+// MOUNT
 app.use("/users", users);
 app.use("/login", login);
 app.use("/collections", collections);
-app.use("/collections", books);
+app.use("/collections", books); // rotas começam com /:collectionId/books
 app.use("/negotiations", negotiation);
 app.use("/ratings", rating);
 
-app.listen(PORT, ()=> console.log(`server runnig on PORT ${PORT}`));
+app.listen(PORT, () => console.log(`server running on PORT ${PORT}`));
+
 
 //PASSO A PASSO
 //1- criar model

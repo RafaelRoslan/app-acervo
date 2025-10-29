@@ -1,6 +1,6 @@
 import express from "express";
 import controller from "../controllers/negotiation.controller.js";
-import authenticate from "../middlewares/authenticate.js";
+import authenticate from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
