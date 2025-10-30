@@ -23,7 +23,7 @@ async function login(req, res) {
         //GERANDO TOKEN DE ACESSO
         const token = service.generateToken(user.id);
 
-        return res.send(token);
+        return res.status(200).json({ token });
         
     } catch (error) {
         //RETORNA ERRO CASO NÃO COSSIGA EXECUTAR O TRY
