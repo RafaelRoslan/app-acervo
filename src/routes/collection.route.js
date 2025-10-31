@@ -8,6 +8,7 @@ const route = express.Router();
 
 route.post("/",authenticate, controller.createCollection);
 route.get("/", authenticate, controller.readCollections);
+route.get("/:collectionId", authenticate, validateId, validateUser, validateCollectionId, controller.readCollectionId);
 route.patch("/:collectionId", authenticate, validateId, validateUser, validateCollectionId, controller.updateCollection);
 route.delete("/:collectionId", authenticate, validateId, validateUser, validateCollectionId, controller.deleteCollection);
 

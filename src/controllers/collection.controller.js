@@ -32,16 +32,36 @@ async function readCollections(req, res) {
         const userId = req.userId;
 
         const collections = await service.getAllCollections(userId);
-        if(collections.length < 1){
-            return res.status(400).send({message: "Não há coleções cadastradas"});
-        }
-
+        
         //RETORNANDO SUCESSO COM MENSAGEM
         res.status(200).send(collections);
     } catch (error) {
         //RETORNANDO ERRO CASO NÃO COSSIGA EXECUTAR O TRY
         res.status(500).send({message: error.message});
     }
+}
+
+export async function readCollectionId(req, res) {
+  try {
+    const { collectionId } = req.params;
+    const userId = req.userId;
+
+    // use o service
+    const col = await service.getCollection(collectionId);
+    if (!col) {
+      return res.status(404).json({ message: "Coleção não encontrada" });
+    }
+
+    // garanta que o dono é o usuário logado
+    if (userId !== req.userId) {
+      return res.status(403).json({ message: "Sem permissão para acessar esta coleção" });
+    }
+
+    return res.status(200).json(col);
+  } catch (e) {
+    console.error("READ COLLECTION ERROR:", e?.message);
+    return res.status(500).json({ message: "Erro interno" });
+  }
 }
 
 async function updateCollection(req, res) {
@@ -56,7 +76,7 @@ async function updateCollection(req, res) {
 
         if(!name){
             //RETORNANDO ERRO 400(BAD REQUEST) SE FALTAR DADOS
-            return res.status(400).send({messagem: "preencha todos os campos para registro."});
+            return res.status(400).send({messagem: "preencha todos os campos para registro. up"});
         }
 
         await service.updateCollection(collectionId, name);
@@ -99,6 +119,7 @@ async function deleteCollection(req, res) {
 export default {
     createCollection,
     readCollections,
+    readCollectionId,
     updateCollection,
     deleteCollection
 }
