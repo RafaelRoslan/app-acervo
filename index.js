@@ -22,7 +22,7 @@ app.use(cors({
   origin: process.env.FRONT_URL || "http://localhost:4200",
   optionsSuccessStatus: 200
 }));
-app.use(express.json());
+app.use(express.json({limit:'1mb'}));
 
 // MOUNT
 app.use("/users", users);

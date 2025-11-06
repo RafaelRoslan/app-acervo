@@ -9,11 +9,11 @@ function getBook(bookId, collectionId) {
 }
 
 function getAllBooks(collectionId) {
-    return Book.find({ collectionId: collectionId });
+    return Book.find({ collectionId: collectionId }).sort({ title: 1 });
 }
 
-function updateBook(bookId, title, author, description, isbn, image) {
-    return Book.findOneAndUpdate({_id: bookId},{title, author, description, isbn, image});
+function updateBook({ bookId, collectionId, updates }) {
+  return Book.findOneAndUpdate({ _id: bookId, collectionId },{ $set: updates },{ new: true });
 }
 
 function deleteBook(bookId) {

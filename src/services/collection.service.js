@@ -9,7 +9,7 @@ function getAllCollections(userId){
 }
 
 function updateCollection(id,name) {
-    return Collection.findByIdAndUpdate({_id:id},{name}, { new: true });
+    return Collection.findByIdAndUpdate({_id:id},{name}, { new: true, runValidators: true});
 }
 
 function deleteCollection(id) {

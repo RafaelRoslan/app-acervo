@@ -20,9 +20,10 @@ const BookSchema = new mongoose.Schema({
     },
     collectionId:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Collection",
-        required:true
-    }
+        ref: 'Collection', 
+        required: true, 
+        immutable: true 
+    },
 });
 
 const Book = mongoose.model("Book",BookSchema);
