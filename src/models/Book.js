@@ -18,13 +18,17 @@ const BookSchema = new mongoose.Schema({
     image:{
         type:String
     },
+    isCover: { 
+        type: Boolean, 
+        default: false 
+    },
     collectionId:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Collection', 
         required: true, 
         immutable: true 
     },
-});
+},{ timestamps: true });
 
 const Book = mongoose.model("Book",BookSchema);
 

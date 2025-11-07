@@ -10,6 +10,7 @@ route.post("/:collectionId/books/", authenticate, controller.createBook);
 route.get("/:collectionId/books/", authenticate, controller.getAllBooks);
 route.get("/:collectionId/books/:bookId", authenticate,validateId, validateUser, validateBookId, controller.readBook);
 route.patch("/:collectionId/books/:bookId", authenticate, validateId, validateUser, validateBookId, controller.updateBook);
+route.patch('/:collectionId/books/:bookId/cover', authenticate, controller.setCover);
 route.delete("/:collectionId/books/:bookId", authenticate, validateId, validateUser, validateBookId, controller.deleteBook);
 
 export default route;

@@ -1,5 +1,6 @@
-import service from "../services/book.service.js";
 import mongoose from 'mongoose';
+import Book from '../models/Book.js';
+import service from "../services/book.service.js";
 
 async function createBook(req, res) {
     try {
@@ -152,10 +153,37 @@ async function getAllBooks(req, res) {
     }
 }
 
+async function setCover(req, res) {
+  try {
+    const { collectionId, bookId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(collectionId) || !mongoose.Types.ObjectId.isValid(bookId)) {
+      return res.status(400).json({ message: 'IDs inválidos' });
+    }
+
+    // zera flags da coleção
+    await Book.updateMany({ collectionId }, { $set: { isCover: false } });
+
+    // define capa neste livro
+    const updated = await Book.findOneAndUpdate(
+      { _id: bookId, collectionId },
+      { $set: { isCover: true } },
+      { new: true }
+    );
+
+    if (!updated) return res.status(404).json({ message: 'Livro não encontrado' });
+    return res.status(200).json({ message: 'Capa definida', book: updated });
+  } catch (e) {
+    console.error('SET COVER ERROR:', e);
+    return res.status(500).json({ message: 'Erro interno' });
+  }
+}
+
 export default {
     createBook,
     readBook,
     updateBook,
     deleteBook,
-    getAllBooks
+    getAllBooks,
+    setCover
 }

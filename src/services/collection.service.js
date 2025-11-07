@@ -20,10 +20,34 @@ function getCollection(id) {
     return Collection.findById(id);
 }
 
+async function getCollectionsWithCover(userId) {
+  const uid = new mongoose.Types.ObjectId(userId);
+
+  return Collection.aggregate([
+    { $match: { userId: uid } },
+    {
+      $lookup: {
+        from: 'books',               // nome da coleção no Mongo (plural minúsculo)
+        let: { cid: '$_id' },
+        pipeline: [
+          { $match: { $expr: { $eq: ['$collectionId', '$$cid'] }, image: { $ne: '' } } },
+          { $addFields: { rank: { $cond: [{ $eq: ['$isCover', true] }, 0, 1] } } },
+          { $sort: { rank: 1, createdAt: 1, _id: 1 } }, // prioriza capa escolhida; senão, 1ª com imagem
+          { $project: { image: 1 } }
+        ],
+        as: '_books'
+      }
+    },
+    { $addFields: { coverImage: { $first: '$_books.image' } } },
+    { $project: { _books: 0 } }
+  ]);
+}
+
 export default {
     createCollection,
     getAllCollections,
     updateCollection,
     deleteCollection,
-    getCollection
+    getCollection,
+    getCollectionsWithCover,
 };
