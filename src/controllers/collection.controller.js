@@ -31,7 +31,7 @@ async function readCollections(req, res) {
     try {
         const userId = req.userId;
 
-        const collections = await service.getAllCollections(userId);
+        const collections = await service.getCollectionsWithCover(userId);
         
         //RETORNANDO SUCESSO COM MENSAGEM
         res.status(200).send(collections);

@@ -10,6 +10,8 @@ import collections from "./src/routes/collection.route.js";
 import negotiation from "./src/routes/negotiation.route.js";
 import rating from "./src/routes/rating.route.js";
 import users from "./src/routes/user.route.js";
+import listingRoutes from './src/routes/listing.route.js';
+import { scheduleExpireListingsJob } from './src/jobs/expire-listings.js';
 
 dotenv.config();
 
@@ -24,6 +26,8 @@ app.use(cors({
 }));
 app.use(express.json({limit:'1mb'}));
 
+scheduleExpireListingsJob();
+
 // MOUNT
 app.use("/users", users);
 app.use("/login", login);
@@ -31,6 +35,7 @@ app.use("/collections", collections);
 app.use("/collections", books); // rotas começam com /:collectionId/books
 app.use("/negotiations", negotiation);
 app.use("/ratings", rating);
+app.use('/listings', listingRoutes);
 
 app.listen(PORT, () => console.log(`server running on PORT ${PORT}`));
 
