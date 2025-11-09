@@ -1,19 +1,28 @@
 import mongoose from 'mongoose';
-import Listing from '../models/Listing.js';
 import Book from '../models/Book.js';
+import Listing from '../models/Listing.js';
 import service from '../services/listing.service.js';
 
 async function createListing(req, res) {
   try {
     const { bookId, price, condition, stock, shipping } = req.body;
 
-    // bookId válido
+    // valida bookId
     if (!mongoose.Types.ObjectId.isValid(bookId)) {
       return res.status(400).json({ message: 'bookId inválido' });
     }
 
-    // normaliza preço: "10,00" -> 10.00
-    const nprice = Number(String(price ?? '').toString().trim().replace('.', ','));
+    // normaliza preço vindo do front (número OU string "15,15"/"15.15")
+    let nprice = null;
+    if (typeof price === 'number') {
+      nprice = price;
+    } else if (typeof price === 'string') {
+      const s = price.trim().replace(/\s+/g, '').replace('.', '').replace(',', '.');
+      // acima: remove separador de milhar “.” e troca vírgula por ponto
+      const nx = Number(s);
+      if (Number.isFinite(nx)) nprice = nx;
+    }
+
     if (!Number.isFinite(nprice) || nprice < 0) {
       return res.status(400).json({ message: 'Preço inválido' });
     }
@@ -34,7 +43,7 @@ async function createListing(req, res) {
       condition: condition || 'bom',
       stock: Number(stock || 1),
       shipping: shipping || 'combinado',
-      // expiresAt default (7 dias)
+      // expiresAt: default no schema (7 dias)
     });
 
     return res.status(201).json({ message: 'Anúncio criado', listing });

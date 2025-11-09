@@ -1,4 +1,3 @@
-import serviceBook from "../services/book.service.js";
 import service from "../services/collection.service.js";
 
 async function createCollection(req, res) {
@@ -90,30 +89,33 @@ async function updateCollection(req, res) {
 }
 
 async function deleteCollection(req, res) {
-    try {
-        const {collectionId} = req.params;
+  try {
+    const { collectionId } = req.params;
 
-        //SOLICITANDO AO SERVICE O RECEBIMENTO DO USUARIO
-        const collection = await service.getCollection(collectionId);
-        if(!collection){
-            return res.status(400).send({message: "Coleção não encontrada"});
-        }
-        if (String(collection.userId) != req.userId){
-            return res.status(400).send({messagem: "Voce não pode deletar coleção de outro usuario"});
-        }
+    const collection = await service.getCollection(collectionId);
 
-        //pegar e deletar todos os livros antes de deletar a coleção.
-        let books = await serviceBook.getAllBooks(collectionId);
-        await Promise.all(books.map(book => serviceBook.deleteBook(book._id)));
 
-        await service.deleteCollection(collectionId);
-        //RETORNANDO SUCESSO COM MENSAGEM
-        res.status(200).send({message: "Coleção deletada com sucesso"});
-    } catch (error) {
-        //RETORNANDO ERRO CASO NÃO COSSIGA EXECUTAR O TRY
-        res.status(500).send({message: error.message});
+    //console.log('[DELETE] req.userId =', req.userId);
+    //console.log('[DELETE] collection.userId =', collection?.userId, 'type=', typeof collection?.userId);
+
+
+
+    if (!collection) {
+      return res.status(400).send({ message: "Coleção não encontrada" });
     }
+    if (!collection.userId.equals(req.userId)) {
+      return res.status(400).send({ messagem: "Voce não pode deletar coleção de outro usuario" });
+    }
+
+    // delete dos books… (como já estava)
+
+    await service.deleteCollection(collectionId); // <<< só a string aqui
+    return res.status(200).send({ message: "Coleção deletada com sucesso" });
+  } catch (error) {
+    return res.status(500).send({ message: error.message });
+  }
 }
+
 
 
 export default {

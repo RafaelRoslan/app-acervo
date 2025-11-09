@@ -4,7 +4,7 @@ import service from "../services/book.service.js";
 
 async function createBook(req, res) {
     try {
-        const {title, author, description, isbn, image} = req.body;
+        const {title, author, description, isbn, image, year, publisher} = req.body;
         const {collectionId} = req.params;
 
         if(!title || !author){
@@ -35,7 +35,9 @@ async function createBook(req, res) {
             description,
             isbn,
             image,
-            collectionId
+            collectionId,
+            year,
+            publisher
         });
 
         //RETORNANDO SUCESSO COM MENSAGEM
@@ -66,59 +68,65 @@ async function readBook(req, res) {
     }
 }
 
+
 async function updateBook(req, res) {
   try {
     const { collectionId, bookId } = req.params;
 
-    // Validação de IDs
     if (!mongoose.Types.ObjectId.isValid(collectionId) || !mongoose.Types.ObjectId.isValid(bookId)) {
       return res.status(400).json({ message: 'IDs inválidos' });
     }
 
-    // Whitelist do body (nada de copiar body inteiro!)
-    const { title, author, description, isbn, image } = req.body;
+    // Whitelist segura
+    const allowed = ['title','author','description','isbn','year','publisher','image'];
     const updates = {};
-    if (title !== undefined) updates.title = String(title).trim();
-    if (author !== undefined) updates.author = String(author).trim();
-    if (description !== undefined) updates.description = String(description).trim();
-    if (isbn !== undefined) updates.isbn = String(isbn).trim();
+    for (const k of allowed) {
+      if (Object.prototype.hasOwnProperty.call(req.body, k)) {
+        updates[k] = req.body[k];
+      }
+    }
 
-    if (image !== undefined) {
-      if (image === '' || image === null) {
+    console.log('updates:', updates);
+
+    // ⚠️ Corrige o uso de `image` fora do escopo
+    if (Object.prototype.hasOwnProperty.call(updates, 'image')) {
+      const img = updates.image; // pode ser '', null, undefined ou data URL
+
+      if (img === '' || img === null) {
+        // limpar imagem
         updates.image = '';
-      } else {
-        if (!/^data:image\/(png|jpe?g|webp);base64,/.test(image)) {
+      } else if (typeof img === 'string') {
+        // validar data URL
+        if (!/^data:image\/(png|jpe?g|webp);base64,/.test(img)) {
           return res.status(400).json({ message: 'Imagem inválida (formato)' });
         }
-        const pure = image.split(',')[1] || '';
+        const pure = img.split(',')[1] || '';
         const bytes = Math.floor((pure.length * 3) / 4);
         if (bytes > 250 * 1024) {
           return res.status(413).json({ message: 'Imagem muito grande (máx 250KB)' });
         }
-        updates.image = image;
+        // mantém updates.image
+      } else {
+        // chegou algo estranho → não mexe na imagem
+        delete updates.image;
       }
     }
 
-    // Bloqueia tentativa de alterar collectionId pelo body
     if ('collectionId' in req.body) delete req.body.collectionId;
 
-    // Confirma que o livro existe na coleção
     const found = await service.getBook(bookId, collectionId);
     if (!found) return res.status(404).json({ message: 'Livro não encontrado na coleção.' });
 
-    //console.log('PATCH updates:', updates);
-
     const updated = await service.updateBook({ bookId, collectionId, updates });
-    //console.log('PATCH updated:', !!updated);
-
     if (!updated) return res.status(404).json({ message: 'Livro não encontrado para atualização' });
 
     return res.status(200).json({ message: 'Livro atualizado com sucesso', book: updated });
   } catch (error) {
-    console.error('UPDATE BOOK ERROR:', error); // imprime stack completa
+    console.error('UPDATE BOOK ERROR:', error);
     return res.status(500).json({ message: error?.message || 'Erro interno' });
   }
 }
+
 
 async function deleteBook(req, res) {
     try {

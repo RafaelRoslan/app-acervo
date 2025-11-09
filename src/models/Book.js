@@ -28,6 +28,14 @@ const BookSchema = new mongoose.Schema({
         required: true, 
         immutable: true 
     },
+    year: { 
+        type: Number, 
+        default: null
+    },
+    publisher: { 
+        type: String, 
+        default: ''
+    },
 },{ timestamps: true });
 
 const Book = mongoose.model("Book",BookSchema);

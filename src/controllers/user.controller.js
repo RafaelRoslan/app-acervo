@@ -1,37 +1,36 @@
 import service from "../services/user.service.js";
 
 async function createUser(req, res) {
-    try {
-        //DESSETRUTURANDO OBJETO EM VARIAVEIS
-        const {name, lastname, email, password} = req.body;
+  try {
+    const { name, lastname, email, password, type } = req.body;
 
-        //VALIDANDO VARIAVEIS
-        if(!name || !lastname || !email || !password){
-            //RETORNANDO ERRO 400(BAD REQUEST) SE FALTAR DADOS
-            return res.status(400).send({messagem: "preencha todos os campos para registro."});
-        }
-
-        //SOLICITANDO AO SERVICE A CRIAÇÃO DO USUARIO
-        let user = await service.createUser(req.body);
-        if (!user) {
-            return res.status(400).send({messagem: "Erro ao cadastrar usúario"})
-        }
-
-        //CRIANDO UM OBJ USUARIO
-        let userRes = {
-            id: user._id,
-            name: name,
-            lastname: lastname,
-            email: email
-        };
-
-        //RETORNANDO SUCESSO COM MENSAGEM
-        res.status(200).send({message: "Cliente cadastrado com sucesso", userRes});
-    } catch (error) {
-        //RETORNANDO ERRO CASO NÃO COSSIGA EXECUTAR O TRY
-        res.status(500).send({message: error.message});
+    if (!name || !lastname || !email || !password || !type) {
+      return res.status(400).send({ message: "Preencha todos os campos obrigatórios." });
     }
+
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return res.status(400).send({ message: "E-mail já cadastrado." });
+    }
+
+    const user = await service.createUser(req.body);
+
+    const userRes = {
+      id: user._id,
+      name: user.name,
+      lastname: user.lastname,
+      email: user.email,
+      type: user.type,
+      createdAt: user.createdAt
+    };
+
+    res.status(201).send({ message: "Usuário cadastrado com sucesso.", user: userRes });
+  } catch (error) {
+    console.error("CREATE USER ERROR:", error);
+    res.status(500).send({ message: error.message });
+  }
 }
+
 
 async function readUser(req, res) {
     try {
@@ -53,37 +52,24 @@ async function readUser(req, res) {
 }
 
 async function updateUser(req, res) {
-    try {
-        
-        //DESSETRUTURANDO OBJETO EM VARIAVEIS        
-        const {name, lastname, email, password, status} = req.body;
-        const id = req.params.id;
+  try {
+    const id = req.params.id;
+    const updates = req.body;
 
-        //VALIDANDO VARIAVEIS
-        if(!name && !lastname && !email && !password){
-            //RETORNANDO ERRO 400(BAD REQUEST) SE FALTAR DADOS
-            return res.status(400).send({menssagem: "preencha todos os campos para registro."});
-        }
+    const user = await service.getUser(id);
+    if (!user) return res.status(404).send({ message: "Usuário não encontrado." });
 
-        //SOLICITANDO AO SERVICE A BUSCA DO USUARIO E CHECANDO
-        const user = await service.getUser(id);
-        if(!user){
-            return res.status(400).send({message: "Usuario não encontrado"});
-         }
-        if(String(user._id) != req.userId){
-            return res.status(400).send({menssagem: "Voce não pode atualizar outro usuario"});
-        }
-
-        //SOLICITANDO AO SERVICE A ATUALIZAÇÃO DE DADOS
-        await service.updateUser(id, name, lastname, email, password, status);
-
-        //RETORNANDO SUCESSO COM MENSAGEM
-        res.status(200).send({menssagem:"Cliente autalizado com sucesso"});
-    } catch (error) {
-        //RETORNANDO ERRO CASO NÃO COSSIGA EXECUTAR O TRY
-        res.status(500).send({message: error.message});
+    if (String(user._id) !== req.userId) {
+      return res.status(403).send({ message: "Você não pode atualizar outro usuário." });
     }
+
+    const updated = await service.updateUser(id, updates);
+    res.status(200).send({ message: "Usuário atualizado com sucesso.", user: updated });
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
 }
+
 
 async function deleteUser(req, res) {
     try {

@@ -1,30 +1,32 @@
+import bcript from "bcryptjs";
 import mongoose from "mongoose";
-import bcript   from "bcryptjs";
 
 const UserSchema = new mongoose.Schema({
-    name:{
+    type: {
         type: String,
+        enum: ['Fisica', 'Juridica'],
         required: true
     },
-    lastname:{
-        type: String,
-        required: true
+    name: { 
+        type: String, 
+        required: true 
     },
-    email:{
-        type: String,
-        required: true,
-        unique: true,
-        lowercase: true
-    },
-    password:{
-        type: String,
-        required: true,
-        select: true
-    },
-    status:{
-        type: String,
+    lastname: { 
+        type: String, 
+        required: true },
+    email: { 
+        type: String, 
+        required: true, 
+        unique: true, 
+        lowercase: true },
+    password: { 
+        type: String, 
+        required: true, 
+        select: true },
+    status: { 
+        type: String, 
         enum: ['ativo', 'inativo'], 
-        default: 'ativo'
+        default: 'ativo' 
     },
     address: {
         logradouro: String,
@@ -37,14 +39,15 @@ const UserSchema = new mongoose.Schema({
     bankDetails: {
         conta: String,
         agencia: String,
-        tipoConta: String, // (poupança, corrente etc.)
+        tipoConta: String,
         titular: String,
         cpfTitular: String
     },
-    pix: {
-        chave: String
-    },
-});
+    pix: { 
+        chave: String 
+    }
+}, { timestamps: true });
+
 
 UserSchema.pre("save", async function (next){
     this.password = await bcript.hash(this.password, 10);

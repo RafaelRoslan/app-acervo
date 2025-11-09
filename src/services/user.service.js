@@ -11,9 +11,10 @@ function getUser(id) {
 }
 
 //FUNCAO ATUALIZAR USUARIO
-function updateUser(id, name, lastname, email, password, status) {
-    return User.findOneAndUpdate({_id: id},{name,lastname,email,password, status});
+function updateUser(id, updates) {
+  return User.findOneAndUpdate({ _id: id }, updates, { new: true });
 }
+
 
 //FUNCAO DELETAR USUARIO
 function deleteUser(id) {

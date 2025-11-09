@@ -1,6 +1,5 @@
-import Collection from "../models/Collection.js";
-import Book from '../models/Book.js';
 import mongoose from 'mongoose';
+import Collection from "../models/Collection.js";
 
 function createCollection(body) {
     return Collection.create(body);
@@ -15,7 +14,7 @@ function updateCollection(id,name) {
 }
 
 function deleteCollection(id) {
-    return Collection.findByIdAndDelete({id});
+    return Collection.findOneAndDelete({ _id: id });
 }
 
 function getCollection(id) {
