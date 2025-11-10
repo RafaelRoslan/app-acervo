@@ -1,14 +1,16 @@
 import mongoose from "mongoose";
 
 const NegotiationSchema = new mongoose.Schema({
-    bookId: {
+    listingsId: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Book"
-    },
-    collectionId: {
+        ref: "Listing",
+        required: true
+    }],
+    booksId: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Collection"
-    },
+        ref: "Book",
+        required: true
+    }],
     buyerId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -23,6 +25,39 @@ const NegotiationSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    payment: {
+        method: {
+            type: String,
+            enum: ["PIX", "TED", "BOLETO"],
+            default: null
+        },
+        comprovanteImage: {
+            type: String,
+            default: null
+        },
+        paidAt: {
+            type: Date,
+            default: null
+        }
+    },
+    shipping: {
+        carrier: {
+            type: String,
+            default: null
+        },
+        trackingCode: {
+            type: String,
+            default: null
+        },
+        proofImage: {
+            type: String,
+            default: null
+        },
+        shippedAt: {
+            type: Date,
+            default: null
+        }
+    },
     isEvaluated: {
         type: Boolean,
         default: false
@@ -33,6 +68,6 @@ const NegotiationSchema = new mongoose.Schema({
     }
 });
 
-const Negotiation = mongoose.model("Negotiation",NegotiationSchema)  ;
+const Negotiation = mongoose.model("Negotiation", NegotiationSchema);
 
 export default Negotiation;

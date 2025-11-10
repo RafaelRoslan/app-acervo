@@ -1,4 +1,5 @@
 import service from "../services/user.service.js";
+import User from "../models/User.js";
 
 async function createUser(req, res) {
   try {
@@ -51,6 +52,14 @@ async function readUser(req, res) {
     }
 }
 
+async function readCurrentUser(req, res) {
+
+    const user = await service.getUser(req.userId);
+    if (!user) return res.status(404).send({ message: "Usuário não encontrado." });
+
+    res.status(200).send({ message: "Usuário encontrado com sucesso.", user });
+}
+
 async function updateUser(req, res) {
   try {
     const id = req.params.id;
@@ -100,6 +109,7 @@ async function deleteUser(req, res) {
 export default {
     createUser,
     readUser,
+    readCurrentUser,
     updateUser,
     deleteUser
 }

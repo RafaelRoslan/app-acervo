@@ -8,7 +8,7 @@ import { validateId, validateUser } from "../middlewares/global.middleware.js";
 const route = express.Router();
 
 route.post("/", controller.createUser);
-//route.get("/me", authenticate, controller.readCurrentUser);
+route.get("/me", authenticate, controller.readCurrentUser);
 route.get("/:id",authenticate, validateId, validateUser, controller.readUser);
 //route.get("/:id",controller.readUser);
 route.patch("/:id",authenticate, validateId, validateUser, controller.updateUser);
