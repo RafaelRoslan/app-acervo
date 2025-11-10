@@ -12,7 +12,7 @@ route.post("/", controller.createUser);
 
 route.patch("/me", authenticate, controller.updateMe);
 
-route.get("/me", authenticate, controller.readCurrentUser);
+route.get("/me", authenticate, controller.readMe);
 route.get("/:id",authenticate, validateId, validateUser, controller.readUser);
 route.patch("/:id",authenticate, validateId, validateUser, controller.updateUser);
 route.delete("/:id", authenticate, validateId, validateUser, controller.deleteUser);

@@ -29,6 +29,7 @@ const UserSchema = new mongoose.Schema({
         default: 'ativo' 
     },
     address: {
+        cep: String,     
         logradouro: String,
         numero: String,
         bairro: String,

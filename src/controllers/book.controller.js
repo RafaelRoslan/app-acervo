@@ -86,7 +86,7 @@ async function updateBook(req, res) {
       }
     }
 
-    console.log('updates:', updates);
+    //console.log('updates:', updates);
 
     // ⚠️ Corrige o uso de `image` fora do escopo
     if (Object.prototype.hasOwnProperty.call(updates, 'image')) {
