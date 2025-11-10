@@ -97,9 +97,59 @@ async function deleteUser(req, res) {
     }
 }
 
+async function readMe(req, res) {
+  try {
+    const id = req.userId; // vem do auth.middleware
+
+    const user = await service.getUser(id);
+    if (!user) {
+      return res.status(400).send({ message: "Usuario não encontrado" });
+    }
+
+    return res.status(200).send({ user });
+  } catch (error) {
+    return res.status(500).send({ message: error.message });
+  }
+}
+
+async function updateMe(req, res) {
+  try {
+    const id = req.userId;
+
+    const existing = await service.getUser(id);
+    if (!existing) {
+      return res.status(400).send({ message: "Usuario não encontrado" });
+    }
+
+    const { name, lastname, type, address, bankDetails, pix, status } = req.body;
+
+    const updates = {};
+
+    if (name !== undefined) updates.name = name;
+    if (lastname !== undefined) updates.lastname = lastname;
+    if (type !== undefined) updates.type = type;       // se você adicionou no schema
+    if (status !== undefined) updates.status = status; // se quiser permitir trocar
+
+    if (address !== undefined) updates.address = address;
+    if (bankDetails !== undefined) updates.bankDetails = bankDetails;
+    if (pix !== undefined) updates.pix = pix;
+
+    const updated = await service.updateUser(id, updates);
+
+    return res.status(200).send({
+      message: "Perfil atualizado com sucesso",
+      user: updated,
+    });
+  } catch (error) {
+    return res.status(500).send({ message: error.message });
+  }
+}
+
 export default {
     createUser,
     readUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    readMe,
+    updateMe
 }
