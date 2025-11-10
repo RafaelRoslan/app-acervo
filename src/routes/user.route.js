@@ -9,9 +9,10 @@ const route = express.Router();
 
 route.post("/", controller.createUser);
 
-route.get("/me", authenticate, controller.readMe);
+
 route.patch("/me", authenticate, controller.updateMe);
 
+route.get("/me", authenticate, controller.readCurrentUser);
 route.get("/:id",authenticate, validateId, validateUser, controller.readUser);
 route.patch("/:id",authenticate, validateId, validateUser, controller.updateUser);
 route.delete("/:id", authenticate, validateId, validateUser, controller.deleteUser);
