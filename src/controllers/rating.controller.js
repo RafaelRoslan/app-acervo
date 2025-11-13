@@ -2,15 +2,26 @@ import service from "../services/rating.service.js";
 
 async function createRating(req, res) {
     try {
-        const { ratedUser, ratedBy, score, comment } = req.body;
+        const { ratedUserId, negotiationId, ratingValue, comment } = req.body;
+        const ratingUserId = req.userId;
 
-        if (!ratedUser || !ratedBy || !score) {
+        if (!ratedUserId || !negotiationId || ratingValue === undefined || ratingValue === null) {
             return res.status(400).send({ message: "Preencha todos os campos obrigatórios para avaliação." });
         }
 
-        const rating = await service.createRating({ ratedUser, ratedBy, score, comment });
+        if (typeof ratingValue !== "number" || ratingValue < 1 || ratingValue > 5) {
+            return res.status(400).send({ message: "A nota deve ser um número entre 1 e 5." });
+        }
 
-        res.status(200).send({ message: "Avaliação criada com sucesso", rating });
+        const rating = await service.createRating({
+            ratedUserId,
+            ratingUserId,
+            negotiationId,
+            ratingValue,
+            comment: comment || null,
+        });
+
+        res.status(201).send({ message: "Avaliação criada com sucesso", rating });
     } catch (error) {
         res.status(500).send({ message: error.message });
     }
@@ -21,9 +32,18 @@ async function getRatingsForUser(req, res) {
         const { userId } = req.params;
 
         const ratings = await service.getRatingsForUser(userId);
-        if (!ratings || ratings.length === 0) {
-            return res.status(404).send({ message: "Nenhuma avaliação encontrada para este usuário." });
-        }
+
+        res.status(200).send({ ratings });
+    } catch (error) {
+        res.status(500).send({ message: error.message });
+    }
+}
+
+async function getRatingsByNegotiation(req, res) {
+    try {
+        const { negotiationId } = req.params;
+
+        const ratings = await service.getRatingsByNegotiation(negotiationId);
 
         res.status(200).send({ ratings });
     } catch (error) {
@@ -34,13 +54,17 @@ async function getRatingsForUser(req, res) {
 async function updateRating(req, res) {
     try {
         const { ratingId } = req.params;
-        const { comment, score } = req.body;
+        const { comment, ratingValue } = req.body;
 
-        if (!comment && !score) {
+        if (!comment && ratingValue === undefined) {
             return res.status(400).send({ message: "É necessário informar pelo menos um campo para atualização." });
         }
 
-        const rating = await service.updateRating(ratingId, comment, score);
+        if (ratingValue !== undefined && (typeof ratingValue !== "number" || ratingValue < 1 || ratingValue > 5)) {
+            return res.status(400).send({ message: "A nota deve ser um número entre 1 e 5." });
+        }
+
+        const rating = await service.updateRating(ratingId, { comment, ratingValue });
         if (!rating) {
             return res.status(404).send({ message: "Avaliação não encontrada." });
         }
@@ -69,6 +93,7 @@ async function deleteRating(req, res) {
 export default {
     createRating,
     getRatingsForUser,
+    getRatingsByNegotiation,
     updateRating,
     deleteRating,
 };

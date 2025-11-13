@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.post("/", authenticate, controller.createRating); // Criar avaliação
 router.get("/user/:userId", authenticate, controller.getRatingsForUser); // Listar avaliações de um usuário
+router.get("/negotiation/:negotiationId", authenticate, controller.getRatingsByNegotiation); // Listar avaliações de uma negociação
 router.put("/:ratingId", authenticate, controller.updateRating); // Atualizar avaliação
 router.delete("/:ratingId", authenticate, controller.deleteRating); // Deletar avaliação
 

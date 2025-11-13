@@ -16,12 +16,15 @@ const RatingSchema = new mongoose.Schema({
         ref: "Negotiation",
         required: true
     },
-    ratingValue: { // Exemplo: de 1 a 5 estrelas
+    ratingValue: {
         type: Number,
-        required: true
+        required: true,
+        min: 1,
+        max: 5
     },
     comment: {
-        type: String // Avaliação opcional
+        type: String,
+        default: null
     },
     date: {
         type: Date,
