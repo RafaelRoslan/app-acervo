@@ -1,4 +1,5 @@
 import Negotiation from "../models/Negotiation.js";
+import NegotiationReport from "../models/NegotiationReport.js";
 
 function createNegotiations(bodies) {
     if (!Array.isArray(bodies)) {
@@ -17,6 +18,7 @@ const DEFAULT_POPULATIONS = [
     { path: "listingsId" },
     { path: "buyerId", select: "-password" },
     { path: "sellerId", select: "-password" },
+    { path: "comments.authorId", select: "-password" },
 ];
 
 function buildPopulateSpec(relations = []) {
@@ -25,7 +27,7 @@ function buildPopulateSpec(relations = []) {
     }
 
     return relations.map((relation) => {
-        if (relation === "buyerId" || relation === "sellerId") {
+        if (relation === "buyerId" || relation === "sellerId" || relation === "comments.authorId") {
             return { path: relation, select: "-password" };
         }
 
@@ -50,6 +52,44 @@ function getAllNegotiationsByUser(userId) {
     }).populate(DEFAULT_POPULATIONS);
 }
 
+function addNegotiationComment(negotiationId, { authorId, role, message }) {
+    const comment = {
+        authorId,
+        message,
+        createdAt: new Date(),
+    };
+
+    if (role) {
+        comment.role = role;
+    }
+
+    return Negotiation.findByIdAndUpdate(
+        negotiationId,
+        { $push: { comments: comment } },
+        { new: true }
+    ).populate(DEFAULT_POPULATIONS);
+}
+
+function createNegotiationReport({ negotiationId, reporterId, accusedId, reason, attachments }) {
+    return NegotiationReport.create({
+        negotiationId,
+        reporterId,
+        accusedId,
+        reason,
+        attachments,
+    });
+}
+
+function getNegotiationReports(negotiationId) {
+    return NegotiationReport.find({ negotiationId })
+        .sort({ createdAt: -1 })
+        .populate([
+            { path: "reporterId", select: "-password" },
+            { path: "accusedId", select: "-password" },
+            { path: "negotiationId" },
+        ]);
+}
+
 function markNegotiationPaid(negotiationId, { method, comprovanteImage }) {
     return Negotiation.findByIdAndUpdate(
         negotiationId,
@@ -59,6 +99,7 @@ function markNegotiationPaid(negotiationId, { method, comprovanteImage }) {
                 comprovanteImage,
                 paidAt: new Date(),
             },
+            status: "aguardando_envio",
         },
         { new: true }
     ).populate(DEFAULT_POPULATIONS);
@@ -74,6 +115,17 @@ function markNegotiationShipped(negotiationId, { carrier, trackingCode, proofIma
                 proofImage,
                 shippedAt: new Date(),
             },
+            status: "encaminhada",
+        },
+        { new: true }
+    ).populate(DEFAULT_POPULATIONS);
+}
+
+function markNegotiationReceived(negotiationId) {
+    return Negotiation.findByIdAndUpdate(
+        negotiationId,
+        {
+            status: "concluido",
         },
         { new: true }
     ).populate(DEFAULT_POPULATIONS);
@@ -83,8 +135,8 @@ function updateNegotiation(negotiationId, status) {
     return Negotiation.findByIdAndUpdate(
         negotiationId,
         { status },
-        { new: true } // Retorna o documento atualizado
-    );
+        { new: true }
+    ).populate(DEFAULT_POPULATIONS);
 }
 
 function deleteNegotiation(negotiationId) {
@@ -96,8 +148,12 @@ export default {
     populateNegotiation,
     getNegotiation,
     getAllNegotiationsByUser,
+    addNegotiationComment,
+    createNegotiationReport,
+    getNegotiationReports,
     markNegotiationPaid,
     markNegotiationShipped,
+    markNegotiationReceived,
     updateNegotiation,
     deleteNegotiation
 };

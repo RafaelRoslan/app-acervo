@@ -52,7 +52,6 @@ async function createNegotiation(req, res) {
                     listingIds: new Map(),
                     itemsIndex: new Map(),
                     totalPrice: 0,
-                    status: group?.status || "pending",
                     sellerInfo: group?.seller || {},
                     buyerInfo: group?.buyer || {},
                 });
@@ -149,7 +148,6 @@ async function createNegotiation(req, res) {
                 listingsId: Array.from(aggregate.listingIds.values()),
                 booksId: Array.from(aggregate.bookIds.values()),
                 price: aggregate.totalPrice,
-                status: aggregate.status,
             }))
         );
 
@@ -201,8 +199,16 @@ async function updateNegotiation(req, res) {
         const { negotiationId } = req.params;
         const { status } = req.body;
 
+        const allowedStatuses = ["esperando_pagamento", "aguardando_envio", "encaminhada", "concluido"];
+
         if (!status) {
             return res.status(400).send({ message: "O status é obrigatório para atualizar a negociação." });
+        }
+
+        if (!allowedStatuses.includes(status)) {
+            return res.status(400).send({ 
+                message: `Status inválido. Utilize um dos seguintes: ${allowedStatuses.join(", ")}.` 
+            });
         }
 
         const negotiation = await service.updateNegotiation(negotiationId, status);
@@ -238,6 +244,111 @@ async function getNegotiationsByUser(req, res) {
         const negotiations = await service.getAllNegotiationsByUser(userId);
 
         res.status(200).send({ negotiations });
+    } catch (error) {
+        res.status(500).send({ message: error.message });
+    }
+}
+
+async function addNegotiationComment(req, res) {
+    try {
+        const { negotiationId } = req.params;
+        const { message } = req.body;
+
+        if (typeof message !== "string" || message.trim() === "") {
+            return res.status(400).send({ message: "O comentário não pode ser vazio." });
+        }
+
+        const negotiation = await service.getNegotiation(negotiationId);
+        if (!negotiation) {
+            return res.status(404).send({ message: "Negociação não encontrada." });
+        }
+
+        const trimmedMessage = message.trim();
+        const currentUserId = req.userId?.toString();
+
+        let role;
+        const buyerId = negotiation?.buyerId?._id?.toString?.() ?? negotiation?.buyerId?.toString?.();
+        const sellerId = negotiation?.sellerId?._id?.toString?.() ?? negotiation?.sellerId?.toString?.();
+
+        if (buyerId && buyerId === currentUserId) {
+            role = "buyer";
+        } else if (sellerId && sellerId === currentUserId) {
+            role = "seller";
+        }
+
+        const updatedNegotiation = await service.addNegotiationComment(negotiationId, {
+            authorId: req.userId,
+            role,
+            message: trimmedMessage,
+        });
+
+        if (!updatedNegotiation) {
+            return res.status(404).send({ message: "Negociação não encontrada." });
+        }
+
+        const comment = updatedNegotiation.comments[updatedNegotiation.comments.length - 1];
+
+        res.status(201).send({ message: "Comentário adicionado com sucesso.", comment });
+    } catch (error) {
+        res.status(500).send({ message: error.message });
+    }
+}
+
+async function createNegotiationReport(req, res) {
+    try {
+        const { negotiationId } = req.params;
+        const { accusedId, reason, attachments } = req.body;
+
+        if (typeof reason !== "string" || reason.trim() === "") {
+            return res.status(400).send({ message: "É necessário informar o motivo da denúncia." });
+        }
+
+        const negotiation = await service.getNegotiation(negotiationId);
+        if (!negotiation) {
+            return res.status(404).send({ message: "Negociação não encontrada." });
+        }
+
+        let accusedObjectId = null;
+        if (accusedId) {
+            accusedObjectId = castObjectId(accusedId);
+            if (!accusedObjectId) {
+                return res.status(400).send({ message: "Identificador do acusado inválido." });
+            }
+        } else {
+            const buyerId = negotiation?.buyerId?._id ?? negotiation?.buyerId;
+            const sellerId = negotiation?.sellerId?._id ?? negotiation?.sellerId;
+            if (buyerId?.toString() === req.userId?.toString()) {
+                accusedObjectId = sellerId;
+            } else if (sellerId?.toString() === req.userId?.toString()) {
+                accusedObjectId = buyerId;
+            }
+        }
+
+        const normalizedAttachments = Array.isArray(attachments)
+            ? attachments.filter((item) => typeof item === "string" && item.trim() !== "").map((item) => item.trim())
+            : [];
+
+        const report = await service.createNegotiationReport({
+            negotiationId,
+            reporterId: req.userId,
+            accusedId: accusedObjectId,
+            reason: reason.trim(),
+            attachments: normalizedAttachments,
+        });
+
+        res.status(201).send({ message: "Denúncia registrada com sucesso.", report });
+    } catch (error) {
+        res.status(500).send({ message: error.message });
+    }
+}
+
+async function listNegotiationReports(req, res) {
+    try {
+        const { negotiationId } = req.params;
+
+        const reports = await service.getNegotiationReports(negotiationId);
+
+        res.status(200).send({ reports });
     } catch (error) {
         res.status(500).send({ message: error.message });
     }
@@ -297,12 +408,32 @@ async function markNegotiationShipped(req, res) {
     }
 }
 
+async function markNegotiationReceived(req, res) {
+    try {
+        const { negotiationId } = req.params;
+
+        const negotiation = await service.markNegotiationReceived(negotiationId);
+
+        if (!negotiation) {
+            return res.status(404).send({ message: "Negociação não encontrada." });
+        }
+
+        res.status(200).send({ message: "Recebimento registrado com sucesso.", negotiation });
+    } catch (error) {
+        res.status(500).send({ message: error.message });
+    }
+}
+
 export default {
     createNegotiation,
     readNegotiation,
     updateNegotiation,
     deleteNegotiation,
     getNegotiationsByUser,
+    addNegotiationComment,
+    createNegotiationReport,
+    listNegotiationReports,
     markNegotiationPaid,
     markNegotiationShipped,
+    markNegotiationReceived,
 };

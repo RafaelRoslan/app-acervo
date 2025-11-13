@@ -25,6 +25,11 @@ const NegotiationSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    status: {
+        type: String,
+        enum: ["esperando_pagamento", "aguardando_envio", "encaminhada", "concluido"],
+        default: "esperando_pagamento"
+    },
     payment: {
         method: {
             type: String,
@@ -58,6 +63,26 @@ const NegotiationSchema = new mongoose.Schema({
             default: null
         }
     },
+    comments: [{
+        authorId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true
+        },
+        role: {
+            type: String,
+            enum: ["buyer", "seller", "admin"],
+        },
+        message: {
+            type: String,
+            required: true,
+            trim: true
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
+    }],
     isEvaluated: {
         type: Boolean,
         default: false
