@@ -46,7 +46,13 @@ const UserSchema = new mongoose.Schema({
     },
     pix: { 
         chave: String 
-    }
+    },
+    role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user',
+  },
+
 }, { timestamps: true });
 
 
